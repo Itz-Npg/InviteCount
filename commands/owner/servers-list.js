@@ -1,5 +1,5 @@
 const Command = require("../../structures/Command.js"),
-Discord = require("discord.js");
+{ EmbedBuilder } = require("discord.js");
 
 class ServersList extends Command {
 
@@ -8,21 +8,21 @@ class ServersList extends Command {
             name: "servers-list",
             enabled: true,
             aliases: [ "sl" ],
-            clientPermissions: [ "EMBED_LINKS" ],
+            clientPermissions: [ "EmbedLinks" ],
             permLevel: 4
         });
     }
 
     async run (message, args, data) {
         
-        await message.delete();
+        await message.delete().catch(() => {});
 
         let i0 = 0;
         let i1 = 10;
         let page = 1;
 
-        let results = await this.client.shard.broadcastEval(() => {
-            return this.guilds.cache.array();
+        let results = await this.client.shard.broadcastEval((c) => {
+            return [...c.guilds.cache.values()].map(g => ({ name: g.name, memberCount: g.memberCount }));
         });
         let guilds = [];
         results.forEach((a) => guilds = [...guilds, ...a]);
@@ -34,36 +34,34 @@ class ServersList extends Command {
         .slice(0, 10)
         .join("\n");
 
-        let embed = new Discord.MessageEmbed()
-            .setAuthor(message.author.tag, message.author.displayAvatarURL())
+        let embed = new EmbedBuilder()
+            .setAuthor({ name: message.author.tag, iconURL: message.author.displayAvatarURL() })
             .setColor(data.color)
-            .setFooter(message.client.user.username)
+            .setFooter({ text: message.client.user.username })
             .setTitle(`Page: ${page}/${Math.ceil(guilds.length/10)}`)
             .setDescription(description);
 
-        let msg = await message.channel.send(embed);
+        let msg = await message.channel.send({ embeds: [embed] });
         
         await msg.react("⬅");
         await msg.react("➡");
         await msg.react("❌");
 
-        let collector = msg.createReactionCollector((reaction, user) => user.id === message.author.id);
+        const filter = (reaction, user) => user.id === message.author.id;
+        let collector = msg.createReactionCollector({ filter, time: 120000 });
 
         collector.on("collect", async(reaction, user) => {
 
-            if(reaction._emoji.name === "⬅") {
-
-                // Updates variables
+            if(reaction.emoji.name === "⬅") {
                 i0 = i0-10;
                 i1 = i1-10;
                 page = page-1;
                 
-                // if there is no guild to display, delete the message
                 if(i0 < 0){
-                    return msg.delete();
+                    return msg.delete().catch(() => {});
                 }
                 if(!i0 || !i1){
-                    return msg.delete();
+                    return msg.delete().catch(() => {});
                 }
                 
                 description = `Total servers: ${guilds.length}\n\n`+
@@ -72,28 +70,23 @@ class ServersList extends Command {
                 .slice(i0, i1)
                 .join("\n");
 
-                // Update the embed with new informations
                 embed.setTitle(`Page: ${page}/${Math.round(guilds.length/10)}`)
                 .setDescription(description);
             
-                // Edit the message 
-                msg.edit(embed);
+                msg.edit({ embeds: [embed] });
             
             };
 
-            if(reaction._emoji.name === "➡"){
-
-                // Updates variables
+            if(reaction.emoji.name === "➡"){
                 i0 = i0+10;
                 i1 = i1+10;
                 page = page+1;
 
-                // if there is no guild to display, delete the message
                 if(i1 > guilds.length + 10){
-                    return msg.delete();
+                    return msg.delete().catch(() => {});
                 }
                 if(!i0 || !i1){
-                    return msg.delete();
+                    return msg.delete().catch(() => {});
                 }
 
                 description = `Total servers: ${guilds.length}\n\n`+
@@ -102,21 +95,18 @@ class ServersList extends Command {
                 .slice(i0, i1)
                 .join("\n");
 
-                // Update the embed with new informations
                 embed.setTitle(`Page: ${page}/${Math.round(guilds.length/10)}`)
                 .setDescription(description);
             
-                // Edit the message 
-                msg.edit(embed);
+                msg.edit({ embeds: [embed] });
 
             };
 
-            if(reaction._emoji.name === "❌"){
-                return msg.delete(); 
+            if(reaction.emoji.name === "❌"){
+                return msg.delete().catch(() => {}); 
             }
 
-            // Remove the reaction when the user react to the message
-            await reaction.users.remove(message.author.id);
+            await reaction.users.remove(message.author.id).catch(() => {});
 
         });
     }

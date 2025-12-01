@@ -1,6 +1,5 @@
 const Command = require("../../structures/Command.js"),
-Discord = require("discord.js"),
-Pagination = require("discord-paginationembed");
+{ EmbedBuilder } = require("discord.js");
 
 class Leaderboard extends Command {
     constructor (client) {
@@ -8,7 +7,7 @@ class Leaderboard extends Command {
             name: "leaderboard",
             enabled: true,
             aliases: [ "top", "lb" ],
-            clientPermissions: [ "EMBED_LINKS" ],
+            clientPermissions: [ "EmbedLinks" ],
             permLevel: 0
         });
     }
@@ -23,12 +22,13 @@ class Leaderboard extends Command {
                 ]
             }
         }).lean();
+        
         if(membersData.length <= 0){
-            let embed = new Discord.MessageEmbed()
-            .setAuthor(message.language.leaderboard.empty.title())
-            .setDescription(message.language.leaderboard.empty.content())
-            .setColor(data.color);
-            return message.channel.send(embed);
+            let embed = new EmbedBuilder()
+                .setAuthor({ name: message.language.leaderboard.empty.title() })
+                .setDescription(message.language.leaderboard.empty.content())
+                .setColor(data.color);
+            return message.channel.send({ embeds: [embed] });
         }
 
         let members = [];
@@ -44,46 +44,35 @@ class Leaderboard extends Command {
         });
         members = members.sort((a, b) => b.calculatedInvites - a.calculatedInvites);
 
-        const embeds = [];
-        /* Distributes array */
-        let i = 0;
-        let memberCount = 0;
+        let description = "";
         let totalMemberCount = 0;
-        await this.client.functions.asyncForEach(members, async (member) => {
-            let index = embeds.length === 0 ? 0 : embeds.length-1;
-            let lastEmbed = embeds[index];
-            if(lastEmbed && memberCount > 9){
-                lastEmbed = new Discord.MessageEmbed();
-                embeds[embeds.length] = lastEmbed;
-                memberCount = 0;
-            } else if(!lastEmbed){
-                lastEmbed = new Discord.MessageEmbed();
-                embeds[index] = lastEmbed;
-            }
-            let oldDesc = lastEmbed.description || "";
+        
+        const topMembers = members.slice(0, 10);
+        
+        for (const member of topMembers) {
             let user = this.client.users.cache.get(member.id) || (message.guild.members.cache.get(member.id) || {}).user;
-            if(!user) user = await this.client.users.fetch(member.id);
+            if(!user) {
+                try {
+                    user = await this.client.users.fetch(member.id);
+                } catch (e) {
+                    continue;
+                }
+            }
             totalMemberCount++;
-            let lb =    totalMemberCount === 1 ? "🏆" :
-                        totalMemberCount === 2 ? "🥈" :
-                        totalMemberCount === 3 ? "🥉" :
-                        `**${totalMemberCount}.**`
-            lastEmbed.setDescription(`${oldDesc}\n${message.language.leaderboard.user(user, member, lb)}\n`);
-            memberCount++;
-        });
+            let lb = totalMemberCount === 1 ? "🏆" :
+                     totalMemberCount === 2 ? "🥈" :
+                     totalMemberCount === 3 ? "🥉" :
+                     `**${totalMemberCount}.**`;
+            description += `${message.language.leaderboard.user(user, member, lb)}\n`;
+        }
 
-        let pagination = new Pagination.Embeds()
-        .setArray(embeds)
-        .setAuthorizedUsers([message.author.id])
-        .setChannel(message.channel)
-        .setPageIndicator(false)
-        .setPage(1)
-        .setColor(data.color)
-        .setFooter(data.footer)
-        .setClientAssets({ prompt: message.language.leaderboard.prompt() })
-        .setTitle(message.language.leaderboard.title());
+        let embed = new EmbedBuilder()
+            .setTitle(message.language.leaderboard.title())
+            .setDescription(description || "No members found")
+            .setColor(data.color)
+            .setFooter({ text: data.footer });
 
-        pagination.build();
+        message.channel.send({ embeds: [embed] });
     }
 
 };

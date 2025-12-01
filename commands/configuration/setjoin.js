@@ -1,5 +1,5 @@
 const Command = require("../../structures/Command.js"),
-Discord = require("discord.js");
+{ EmbedBuilder } = require("discord.js");
 
 class SetJoin extends Command {
     constructor (client) {
@@ -7,7 +7,7 @@ class SetJoin extends Command {
             name: "setjoin",
             enabled: true,
             aliases: [],
-            clientPermissions: [ "EMBED_LINKS" ],
+            clientPermissions: [ "EmbedLinks" ],
             permLevel: 2
         });
     }

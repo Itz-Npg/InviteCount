@@ -1,5 +1,5 @@
 const Command = require("../../structures/Command.js"),
-    Discord = require("discord.js");
+    { EmbedBuilder, PermissionFlagsBits, ChannelType } = require("discord.js");
 
 const giveawayModel = require('../../models/giveaway');
 const ms = require('ms');
@@ -10,27 +10,27 @@ class Gstart extends Command {
             name: "gstart",
             enabled: true,
             aliases: [],
-            clientPermissions: ["EMBED_LINKS"],
+            clientPermissions: ["EmbedLinks"],
             permLevel: 0
         });
     }
 
     async run(message, args, data) {
-        if (!message.member.permissions.has("MANAGE_GUILD")) {
+        if (!message.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
             return message.channel.send(message.language.errors.perms());
         }
-        const currentGiveaways = message.client.giveawaysManager.giveaways.filter((g) => g.guildID === message.guild.id && !g.ended).length;
+        const currentGiveaways = message.client.giveawaysManager.giveaways.filter((g) => g.guildId === message.guild.id && !g.ended).length;
         if (currentGiveaways > 3 || currentGiveaways == 4) {
-            return message.channel.send(new Discord.MessageEmbed().setColor("#E07C2D").setDescription("The maximum number of giveaways per server has been reached (4) Please end these giveaways first."))
+            return message.channel.send({ embeds: [new EmbedBuilder().setColor("#E07C2D").setDescription("The maximum number of giveaways per server has been reached (4) Please end these giveaways first.")] });
         }
         const prompts = ["Hello ! Please mention the channel you want to host the giveaway in. !",
             "Super ! How long do you want the giveaway to last? \n You can use `m` for minutes, `h` for hours, `d` for days.",
             "How many winners will this giveaway have? \n Please enter a number between `1` and `10`.",
             "Good. What is the prize of this giveaway? \n Please enter the giveaway prize under this message.",
             "How many messages do giveaway participant need to have? \n Answer `0` to skip this step.",
-        ]
-        const response = await getResponses(message)
-        if (response.cancelled) return
+        ];
+        const response = await getResponses(message, this.client, data);
+        if (response.cancelled) return;
         const infos = {
             "end": "Ends at :",
             "enter": "React with 🎁 to enter",
@@ -48,14 +48,13 @@ class Gstart extends Command {
             "minutes": "minutes",
             "hours": "hours",
             "days": "days"
-        }
+        };
         let condition;
         if (response.invites && response.messages) {
             condition = infos.requirementMessage.replace("{messages}", response.messages).replace("{count}", response.invites);
         } else {
             if (!response.invites && !response.messages) {
                 condition = "";
-
             } else {
                 if (response.messages) {
                     condition = infos.requirementMessage.replace("{messages}", response.messages);
@@ -64,17 +63,16 @@ class Gstart extends Command {
                     condition = infos.requirementInvite.replace("{messages}", response.invites);
                 }
             }
-
         }
-        let embed = new Discord.MessageEmbed()
-            .setAuthor("🎁 Giveaway System", this.client.user.displayAvatarURL())
+        let embed = new EmbedBuilder()
+            .setAuthor({ name: "🎁 Giveaway System", iconURL: this.client.user.displayAvatarURL() })
             .setDescription(`Your giveaway has been started in ${response.channel}. You can manage it with the followings commands : \`greroll\` , \`gend\`.`)
             .setColor(data.color)
-            .setFooter(message.language.add.requested(message.author.username), message.author.displayAvatarURL());
-        message.channel.send(embed);
+            .setFooter({ text: message.language.add.requested(message.author.username), iconURL: message.author.displayAvatarURL() });
+        message.channel.send({ embeds: [embed] });
 
         message.client.giveawaysManager.start(response.channel, {
-            time: response.time,
+            duration: response.time,
             prize: response.price,
             winnerCount: parseInt(response.winners, 10),
             embedColorEnd: "#ED360E",
@@ -98,107 +96,111 @@ class Gstart extends Command {
             }
         }).then((gData) => {
             if (response.invites && response.messages) {
-                const verynew = new giveawayModel({
-                    serverID: `${gData.guildID}`,
-                    MessageID: `${gData.messageID}`,
+                new giveawayModel({
+                    serverID: `${gData.guildId}`,
+                    MessageID: `${gData.messageId}`,
                     requiredMessages: `${response.messages}`,
                     requiredInvites: `${response.invites}`
-                }).save()
-
+                }).save();
             } else {
                 if (!response.invites && !response.messages) {
-
                 } else {
                     if (response.messages) {
-                        const verynew = new giveawayModel({
-                            serverID: `${gData.guildID}`,
-                            MessageID: `${gData.messageID}`,
+                        new giveawayModel({
+                            serverID: `${gData.guildId}`,
+                            MessageID: `${gData.messageId}`,
                             requiredMessages: `${response.messages}`,
-                        }).save()
-
+                        }).save();
                     }
                     if (response.invites) {
-                        const verynew = new giveawayModel({
-                            serverID: `${gData.guildID}`,
-                            MessageID: `${gData.messageID}`,
+                        new giveawayModel({
+                            serverID: `${gData.guildId}`,
+                            MessageID: `${gData.messageId}`,
                             requiredInvites: `${response.invites}`
-                        }).save()
+                        }).save();
                     }
                 }
-
             }
             if (response.messages) {
-                const verynew = new giveawayModel({
-                    serverID: `${gData.guildID}`,
-                    MessageID: `${gData.messageID}`,
+                new giveawayModel({
+                    serverID: `${gData.guildId}`,
+                    MessageID: `${gData.messageId}`,
                     requiredMessages: `${response.messages}`,
-                }).save()
+                }).save();
             }
         });
 
-
-        async function getResponses(message) {
+        async function getResponses(message, client, data) {
             const validTime = /^\d+(s|m|h|d)$/;
             const validNumber = /^\d+/;
-            const responses = {}
-            let can = "Note: You can type at any moment `cancel` to cancel ."
+            const responses = {};
+            let can = "Note: You can type at any moment `cancel` to cancel .";
             for (let i = 0; i < prompts.length; i++) {
-                await message.channel.send(new Discord.MessageEmbed().setAuthor("🎁 Giveaway System", message.client.user.displayAvatarURL()).setColor(data.color).setDescription(`${prompts[i]}\n\n${can}`));
-                const response = await message.channel.awaitMessages(m => m.author.id === message.author.id, { max: 1 })
+                await message.channel.send({ embeds: [new EmbedBuilder().setAuthor({ name: "🎁 Giveaway System", iconURL: message.client.user.displayAvatarURL() }).setColor(data.color).setDescription(`${prompts[i]}\n\n${can}`)] });
+                const filter = m => m.author.id === message.author.id;
+                const response = await message.channel.awaitMessages({ filter, max: 1, time: 90000 }).catch(() => null);
+                if (!response || response.size === 0) {
+                    responses.cancelled = true;
+                    message.channel.send({ embeds: [new EmbedBuilder().setColor(data.color).setTitle("💡 Operation cancelled")] });
+                    return responses;
+                }
                 const { content } = response.first();
                 const m = response.first();
                 if (content.toLowerCase() === "cancel") {
                     responses.cancelled = true;
-                    message.channel.send(new Discord.MessageEmbed().setColor(data.color).setTitle("💡 Operation cancelled"))
+                    message.channel.send({ embeds: [new EmbedBuilder().setColor(data.color).setTitle("💡 Operation cancelled")] });
                     return responses;
-                    break;
                 }
                 if (i === 0) {
                     let channel = m.mentions.channels.first() ||
-                        message.guild.channels.cache.get(content)
-                    if (!channel) return message.channel.send(new Discord.MessageEmbed().setColor("#E07C2D").setDescription(message.language.configjoin.errors.channelNotFound(content)));
-
-                    if (channel.type === "category") {
-                        return message.channel.send(new Discord.MessageEmbed().setColor("#E07C2D").setDescription(message.language.configjoin.errors.channelNotFound(content)));
-                    }
-                    if (channel.type === "voice") {
-                        return message.channel.send(new Discord.MessageEmbed().setColor("#E07C2D").setDescription(message.language.configjoin.errors.channelNotFound(content)));
+                        message.guild.channels.cache.get(content);
+                    if (!channel) {
+                        responses.cancelled = true;
+                        await message.channel.send({ embeds: [new EmbedBuilder().setColor("#E07C2D").setDescription(message.language.configjoin.errors.channelNotFound(content))] });
+                        return responses;
                     }
 
-
-
+                    if (channel.type === ChannelType.GuildCategory) {
+                        responses.cancelled = true;
+                        await message.channel.send({ embeds: [new EmbedBuilder().setColor("#E07C2D").setDescription(message.language.configjoin.errors.channelNotFound(content))] });
+                        return responses;
+                    }
+                    if (channel.type === ChannelType.GuildVoice) {
+                        responses.cancelled = true;
+                        await message.channel.send({ embeds: [new EmbedBuilder().setColor("#E07C2D").setDescription(message.language.configjoin.errors.channelNotFound(content))] });
+                        return responses;
+                    }
                     responses.channel = channel;
-
-
                 }
                 if (i === 1) {
                     if (isNaN(ms(content))) {
-                        return message.errorMessage(`Veuillez fournir une date valide pour ce giveaway , au format d/m/s . Exemple : 1d . Veuillez refaire la commande.`)
-                        break;
+                        responses.cancelled = true;
+                        await message.channel.send({ embeds: [new EmbedBuilder().setColor("#E07C2D").setDescription("Please provide a valid date format (d/m/s). Example: 1d")] });
+                        return responses;
                     } else {
                         if (ms(content) > ms("15d")) {
-                            return message.errorMessage(`La date ne doit pas dépasser 15 jours . Veuillez refaire la commande.`)
-                            break;
+                            responses.cancelled = true;
+                            await message.channel.send({ embeds: [new EmbedBuilder().setColor("#E07C2D").setDescription("Date must not exceed 15 days.")] });
+                            return responses;
                         } else {
                             responses.time = ms(content);
                         }
-
                     }
                 }
                 if (i === 2) {
                     if (isNaN(content) || content < 1 || content > 10 || m.content.includes('-') || m.content.includes('+') || m.content.includes(',') || m.content.includes('.')) {
-                        return message.channel.send(new Discord.MessageEmbed().setColor("#E07C2D").setDescription("Please provide a valid number beetween **1** and **10**"));
-
-                        break;
+                        responses.cancelled = true;
+                        await message.channel.send({ embeds: [new EmbedBuilder().setColor("#E07C2D").setDescription("Please provide a valid number between **1** and **10**")] });
+                        return responses;
                     } else {
                         responses.winners = content;
                     }
                 }
                 if (i === 3) {
-                    if (content < 2 || content > 1000) {
-                        return message.channel.send(new Discord.MessageEmbed().setColor("#E07C2D").setDescription("Please provide a valid number beetween **1** and **10**"));
-
-                        break;
+                    if (content.length < 2 || content.length > 1000) {
+                        responses.cancelled = true;
+                        await message.channel.send({ embeds: [new EmbedBuilder().setColor("#E07C2D").setDescription("Prize must be between 2 and 1000 characters")] });
+                        return responses;
                     }
                     responses.price = content;
                 }
@@ -207,22 +209,17 @@ class Gstart extends Command {
                         responses.messages = null;
                     } else {
                         if (isNaN(content) || content < 1 || m.content.includes('-') || m.content.includes('+') || m.content.includes(',') || m.content.includes('.')) {
-
-                            return message.channel.send(new Discord.MessageEmbed().setColor("#E07C2D").setDescription("Please provide a valid number beetween **1** and **10**"));
-
-                            break;
+                            responses.cancelled = true;
+                            await message.channel.send({ embeds: [new EmbedBuilder().setColor("#E07C2D").setDescription("Please provide a valid number")] });
+                            return responses;
                         } else {
                             responses.messages = content;
                         }
                     }
                 }
-
-
             }
             return responses;
         }
-
-
     }
 
 };

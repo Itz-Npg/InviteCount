@@ -1,5 +1,5 @@
 const Command = require("../../structures/Command.js"),
-Discord = require("discord.js");
+{ EmbedBuilder } = require("discord.js");
 
 class Support extends Command {
     constructor (client) {
@@ -7,19 +7,19 @@ class Support extends Command {
             name: "support",
             enabled: true,
             aliases: [ "s" ],
-            clientPermissions: [ "EMBED_LINKS" ],
+            clientPermissions: [ "EmbedLinks" ],
             permLevel: 0
         });
     }
 
     async run (message, args, data) {
 
-        let embed = new Discord.MessageEmbed()
-        .setAuthor("InviteCount", this.client.user.displayAvatarURL())
-        .setDescription(message.language.support.content(this.client.user.id))
-        .setColor(this.client.config.color)
-        .setFooter(message.language.support.requested(message.author.username), message.author.displayAvatarURL());
-        message.channel.send(embed);
+        let embed = new EmbedBuilder()
+            .setAuthor({ name: "InviteCount", iconURL: this.client.user.displayAvatarURL() })
+            .setDescription(message.language.support.content(this.client.user.id))
+            .setColor(this.client.config.color)
+            .setFooter({ text: message.language.support.requested(message.author.username), iconURL: message.author.displayAvatarURL() });
+        message.channel.send({ embeds: [embed] });
 
     }
 

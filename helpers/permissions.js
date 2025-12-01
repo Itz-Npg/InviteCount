@@ -1,23 +1,25 @@
+const { PermissionFlagsBits } = require("discord.js");
+
 module.exports = [
     {
         level: 0,
-        name: "Iser",
+        name: "User",
         check: () => true,
     },
     {
         level: 1,
         name: "Moderator",
-        check: (message) => (message.guild ? message.member.hasPermission("MANAGE_MESSAGES") : false),
+        check: (message) => (message.guild ? message.member.permissions.has(PermissionFlagsBits.ManageMessages) : false),
     },
     {
         level: 2,
         name: "Administrator",
-        check: (message) => (message.guild ? message.member.hasPermission("ADMINISTRATOR") : false),
+        check: (message) => (message.guild ? message.member.permissions.has(PermissionFlagsBits.Administrator) : false),
     },
     {
         level: 3,
         name: "Owner",
-        check: (message) => (message.guild ? message.author.id === (message.guild.owner || { user: { id: null }}).user.id : false),
+        check: (message) => (message.guild ? message.author.id === message.guild.ownerId : false),
     },
     {
         level: 4,

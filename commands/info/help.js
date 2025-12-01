@@ -1,5 +1,5 @@
 const Command = require("../../structures/Command.js"),
-Discord = require("discord.js");
+{ EmbedBuilder } = require("discord.js");
 
 class Help extends Command {
     constructor (client) {
@@ -7,25 +7,27 @@ class Help extends Command {
             name: "help",
             enabled: true,
             aliases: [ "h", "aide" ],
-            clientPermissions: [ "EMBED_LINKS" ],
+            clientPermissions: [ "EmbedLinks" ],
             permLevel: 0
         });
     }
 
     async run (message, args, data) {
    
-        let embed = new Discord.MessageEmbed()
+        let embed = new EmbedBuilder()
             .setTitle(message.language.help.title())
             .setDescription(message.language.help.description(message.guild.name, data.guild.prefix))
-            .addField(message.language.help.admin.title(), message.language.help.admin.content(data.guild.prefix))
-            .addField(message.language.help.moderation.title(), message.language.help.moderation.content(data.guild.prefix))
-            .addField(message.language.help.joinDM.title(), message.language.help.joinDM.content(data.guild.prefix));
-
-            embed.addField(message.language.help.join.title(), message.language.help.join.content(data.guild.prefix))
+            .addFields(
+                { name: message.language.help.admin.title(), value: message.language.help.admin.content(data.guild.prefix) },
+                { name: message.language.help.moderation.title(), value: message.language.help.moderation.content(data.guild.prefix) },
+                { name: message.language.help.joinDM.title(), value: message.language.help.joinDM.content(data.guild.prefix) },
+                { name: message.language.help.join.title(), value: message.language.help.join.content(data.guild.prefix) },
+                { name: message.language.help.giveaway.title(), value: message.language.help.giveaway.content(data.guild.prefix) }
+            )
             .setColor(data.color)
-            .setFooter(data.footer);
+            .setFooter({ text: data.footer });
 
-        message.channel.send(embed);
+        message.channel.send({ embeds: [embed] });
     }
 }
 

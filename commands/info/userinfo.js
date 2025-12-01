@@ -1,6 +1,6 @@
 const Command = require("../../structures/Command.js"),
 moment = require("moment"),
-Discord = require("discord.js");
+{ EmbedBuilder } = require("discord.js");
 
 class Userinfo extends Command {
     constructor (client) {
@@ -8,14 +8,13 @@ class Userinfo extends Command {
             name: "userinfo",
             enabled: true,
             aliases: [ "ui" ],
-            clientPermissions: [ "EMBED_LINKS" ],
+            clientPermissions: [ "EmbedLinks" ],
             permLevel: 0
         });
     }
 
     async run (message, args, data) {
 
-        // Fetch user and member
         let user = message.mentions.users.first() || await this.client.resolveUser(args[0]) || message.author;
         let member = await message.guild.members.fetch(user.id).catch(() => {});
         let memberData = member ? await this.client.findOrCreateGuildMember({ id: member.id, guildID: member.guild.id }) : null;
@@ -25,14 +24,16 @@ class Userinfo extends Command {
         moment.locale(data.guild.language.substr(0, 2));
 
         let creationDate = moment(user.createdAt, "YYYYMMDD").fromNow();
-        let joinDate = moment(member.joinedAt, "YYYYMMDD").fromNow();
+        let joinDate = member ? moment(member.joinedAt, "YYYYMMDD").fromNow() : null;
 
-        let embed = new Discord.MessageEmbed()
-        .setAuthor(message.language.userinfo.title(user), user.displayAvatarURL())
-        .addField(fields.bot.title(), fields.bot.content(user), true)
-        .addField(fields.createdAt.title(), creationDate.charAt(0).toUpperCase() + creationDate.substr(1, creationDate.length), true)
-        .setColor(data.color)
-        .setFooter(data.footer);
+        let embed = new EmbedBuilder()
+            .setAuthor({ name: message.language.userinfo.title(user), iconURL: user.displayAvatarURL() })
+            .addFields(
+                { name: fields.bot.title(), value: fields.bot.content(user), inline: true },
+                { name: fields.createdAt.title(), value: creationDate.charAt(0).toUpperCase() + creationDate.substr(1, creationDate.length), inline: true }
+            )
+            .setColor(data.color)
+            .setFooter({ text: data.footer });
         
         if(member){
             let joinData = memberData.joinData || (memberData.invitedBy ? { type: "normal", invite: { inviter: memberData.invitedBy } } : { type: "unknown" } );
@@ -46,17 +47,19 @@ class Userinfo extends Command {
                 joinWay = fields.joinWay.oauth();
             }
             await message.guild.members.fetch();
-            const members = message.guild.members.cache.array().sort((a,b) => a.joinedTimestamp - b.joinedTimestamp);
+            const members = [...message.guild.members.cache.values()].sort((a,b) => a.joinedTimestamp - b.joinedTimestamp);
             let joinPos = members.map((u) => u.id).indexOf(member.id);
             let previous = members[joinPos - 1] ? members[joinPos - 1].user : null;
             let next = members[joinPos + 1] ? members[joinPos + 1].user : null;
-            embed.addField(fields.joinedAt.title(), joinDate.charAt(0).toUpperCase() + joinDate.substr(1, joinDate.length), true)
-            .addField(fields.invites.title(), fields.invites.content(memberData))
-            .addField(fields.joinWay.title(), joinWay)
-            .addField(fields.joinOrder.title(), fields.joinOrder.content(previous, next, user));
+            embed.addFields(
+                { name: fields.joinedAt.title(), value: joinDate.charAt(0).toUpperCase() + joinDate.substr(1, joinDate.length), inline: true },
+                { name: fields.invites.title(), value: fields.invites.content(memberData) },
+                { name: fields.joinWay.title(), value: joinWay },
+                { name: fields.joinOrder.title(), value: fields.joinOrder.content(previous, next, user) }
+            );
         }
 
-        message.channel.send(embed);
+        message.channel.send({ embeds: [embed] });
     }
 
 };

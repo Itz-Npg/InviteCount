@@ -1,5 +1,5 @@
 const Command = require("../../structures/Command.js"),
-Discord = require("discord.js");
+{ EmbedBuilder } = require("discord.js");
 
 class Config extends Command {
     constructor (client) {
@@ -7,7 +7,7 @@ class Config extends Command {
             name: "config",
             enabled: true,
             aliases: [ "conf", "configuration" ],
-            clientPermissions: [ "EMBED_LINKS" ],
+            clientPermissions: [ "EmbedLinks" ],
             permLevel: 2
         });
     }
@@ -27,14 +27,16 @@ class Config extends Command {
         && data.guild.leave.channel
         && message.guild.channels.cache.get(data.guild.leave.channel);
 
-        let embed = new Discord.MessageEmbed()
+        let embed = new EmbedBuilder()
             .setTitle(message.language.config.title(message.guild.name))
-            .addField(message.language.config.join.title(joinSuccess), message.language.config.join.content(message.guild, data), true)
-            .addField(message.language.config.leave.title(leaveSuccess), message.language.config.leave.content(message.guild, data), true)
-            .addField(message.language.config.joinDM.title(joinDMSuccess), message.language.config.joinDM.content(message.guild, data), true)
+            .addFields(
+                { name: message.language.config.join.title(joinSuccess), value: message.language.config.join.content(message.guild, data), inline: true },
+                { name: message.language.config.leave.title(leaveSuccess), value: message.language.config.leave.content(message.guild, data), inline: true },
+                { name: message.language.config.joinDM.title(joinDMSuccess), value: message.language.config.joinDM.content(message.guild, data), inline: true }
+            )
             .setColor(data.color)
-            .setFooter(data.footer);
-        message.channel.send(embed);
+            .setFooter({ text: data.footer });
+        message.channel.send({ embeds: [embed] });
     }
 };
           

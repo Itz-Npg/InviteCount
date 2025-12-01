@@ -2,20 +2,54 @@
 
 # InviteCount
 [![](https://img.shields.io/discord/753213979706261604.svg?logo=discord&colorB=7289DA)](https://discord.com/invite/6QsXCfw)
-[![](https://img.shields.io/badge/discord.js-v12.0.0--dev-blue.svg?logo=npm)](https://github.com/discordjs)
+[![](https://img.shields.io/badge/discord.js-v14.14.1-blue.svg?logo=npm)](https://github.com/discordjs)
 [![](https://img.shields.io/badge/paypal-donate-blue.svg)](https://patreon.com/Androz2091)
 
 > InviteCount is used by + 1 500,000 users in + 1 300 servers!
 
-## 🌐 Dashboard
+## 🔧 Console Application
 
-InviteCount has a powerful dashboard which allow you to manage your servers easily! Configure join/leave messages, change server prefix, server language, etc...
+InviteCount is a powerful Discord bot that runs as a console application. Configure join/leave messages, change server prefix, server language, and manage all your server settings easily through Discord commands!
 
-<img src="https://cdn.discordapp.com/attachments/754079986788466769/764408746814078976/Dxs7xZeYjLWbAAAAAElFTkSuQmCC.png" style="margin-right: 2px;width: 40%;" ></img>
+## 🌍 Supported Languages
+
+InviteCount now supports **31 languages**! Use the `+setlang` command to change your server's language:
+
+- 🇫🇷 French (`fr`)
+- 🇬🇧 English (`en`)
+- 🇹🇷 Turkish (`tr`)
+- 🇷🇺 Russian (`ru`)
+- 🇯🇵 Japanese (`jp`)
+- 🇮🇳 Hindi (`hi`)
+- 🇵🇹 Portuguese (`pt`)
+- 🇧🇷 Brazilian Portuguese (`br`)
+- 🇪🇸 Spanish (`es`)
+- 🇩🇪 German (`de`)
+- 🇮🇹 Italian (`it`)
+- 🇵🇱 Polish (`pl`)
+- 🇳🇱 Dutch (`nl`)
+- 🇸🇪 Swedish (`sv`)
+- 🇳🇴 Norwegian (`no`)
+- 🇩🇰 Danish (`da`)
+- 🇫🇮 Finnish (`fi`)
+- 🇬🇷 Greek (`el`)
+- 🇨🇿 Czech (`cs`)
+- 🇭🇺 Hungarian (`hu`)
+- 🇷🇴 Romanian (`ro`)
+- 🇷🇸 Serbian (`sr`)
+- 🇭🇷 Croatian (`hr`)
+- 🇧🇬 Bulgarian (`bg`)
+- 🇺🇦 Ukrainian (`uk`)
+- 🇸🇰 Slovak (`sk`)
+- 🇸🇮 Slovenian (`sl`)
+- 🇦🇱 Albanian (`sq`)
+- 🇮🇸 Icelandic (`is`)
+- 🇧🇾 Belarusian (`be`)
+- 🇱🇹 Lithuanian (`lt`)
 
 ## 💪 Features
 
-> **InviteCount** has a total of 24 commands!
+> **InviteCount** has a total of 35+ commands with support for 31 languages!
 
 ### ⚙️ Config commands
 
@@ -97,4 +131,3 @@ The main bot [InviteCount](https://top.gg/bot/577236734245470228/invite) don't u
 *   [Github](https://github.com/ThisDudeBoy/InviteCount)
 *   [InviteCount Discord Bot 24/7 Online (New version)](https://top.gg/bot/577236734245470228/invite)
 *   [ManageInvite](https://github.com/ManageInvite/)
-

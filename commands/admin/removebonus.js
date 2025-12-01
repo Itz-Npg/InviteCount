@@ -1,5 +1,5 @@
 const Command = require("../../structures/Command.js"),
-Discord = require("discord.js");
+{ EmbedBuilder } = require("discord.js");
 
 class RemoveBonus extends Command {
     constructor (client) {
@@ -7,7 +7,7 @@ class RemoveBonus extends Command {
             name: "removebonus",
             enabled: true,
             aliases: [ "delbonus", "removebonus" ],
-            clientPermissions: [ "EMBED_LINKS" ],
+            clientPermissions: [ "EmbedLinks" ],
             permLevel: 2
         });
     }
@@ -26,13 +26,13 @@ class RemoveBonus extends Command {
         memberData.markModified("bonus");
         await memberData.save();
 
-        let embed = new Discord.MessageEmbed()
-        .setAuthor(message.language.removebonus.title())
-        .setDescription(message.language.removebonus.field(data.guild.prefix, member))
-        .setColor(data.color)
-        .setFooter(data.footer);
+        let embed = new EmbedBuilder()
+            .setAuthor({ name: message.language.removebonus.title() })
+            .setDescription(message.language.removebonus.field(data.guild.prefix, member))
+            .setColor(data.color)
+            .setFooter({ text: data.footer });
 
-        message.channel.send(embed);
+        message.channel.send({ embeds: [embed] });
     }
 
 };

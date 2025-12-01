@@ -1,5 +1,5 @@
 const Command = require("../../structures/Command.js"),
-Discord = require("discord.js");
+{ EmbedBuilder } = require("discord.js");
 
 class SetDMJoin extends Command {
     constructor (client) {
@@ -7,7 +7,7 @@ class SetDMJoin extends Command {
             name: "setdmjoin",
             enabled: true,
             aliases: [ "setdm" ],
-            clientPermissions: [ "EMBED_LINKS" ],
+            clientPermissions: [ "EmbedLinks" ],
             permLevel: 2
         });
     }
@@ -21,7 +21,7 @@ class SetDMJoin extends Command {
             return message.channel.send(message.language.setdmjoin.on());
         }
         if(data.guild.joinDM.enabled){
-            data.guild.joinDM.enabled = true;
+            data.guild.joinDM.enabled = false;
             data.guild.markModified("joinDM");
             await data.guild.save();
             return message.channel.send(message.language.setdmjoin.off());

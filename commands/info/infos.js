@@ -1,5 +1,5 @@
 const Command = require("../../structures/Command.js"),
-Discord = require("discord.js");
+{ EmbedBuilder } = require("discord.js");
 
 class Infos extends Command {
     constructor (client) {
@@ -7,7 +7,7 @@ class Infos extends Command {
             name: "infos",
             enabled: true,
             aliases: [ "info", "botinfo" ],
-            clientPermissions: [ "EMBED_LINKS" ],
+            clientPermissions: [ "EmbedLinks" ],
             permLevel: 0
         });
     }
@@ -30,33 +30,36 @@ class Infos extends Command {
         let usersCount = message.client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0)
         let title = message.language.infos.statistics.title(this.client.shard.ids[0], false);
         
-        let results = await this.client.shard.broadcastEval(() => {
+        let results = await this.client.shard.broadcastEval((c) => {
             return [
                 Math.round((process.memoryUsage().heapUsed / 1024 / 1024)),
-                this.guilds.cache.size,
-                this.channels.cache.size,
-                this.shard.ids[0],
-                Math.round(this.ws.ping)
+                c.guilds.cache.size,
+                c.channels.cache.size,
+                c.shard.ids[0],
+                Math.round(c.ws.ping)
             ];
         });
-  let resultsa = await this.client.shard.broadcastEval(() => {
-            return this.guilds.cache.array();
+        let resultsa = await this.client.shard.broadcastEval((c) => {
+            return [...c.guilds.cache.values()].map(g => ({ memberCount: g.memberCount }));
         });
         let guilds = [];
         resultsa.forEach((a) => guilds = [...guilds, ...a]);
         let usersCountW = 0;
         guilds.forEach(g => usersCountW = usersCountW + g.memberCount)
-        let embed = new Discord.MessageEmbed()
-        .setColor(data.color)
-        .setFooter(data.footer)
-        .setTitle(message.language.infos.title())
-        .setDescription(message.language.infos.content(message.guild.name, data.guild.prefix))
-        .setAuthor("InviteCount | v1.5.0", this.client.user.displayAvatarURL())
-        .addField(message.language.infos.dev.title(), message.language.infos.dev.content(uptime), true)
-        .addField(title, message.language.infos.statistics.content(guildsCount, channelsCount, usersCountW), false)
-        .addField(message.language.infos.link.title(), message.language.infos.link.content(), false)
+        
+        let embed = new EmbedBuilder()
+            .setColor(data.color)
+            .setFooter({ text: data.footer })
+            .setTitle(message.language.infos.title())
+            .setDescription(message.language.infos.content(message.guild.name, data.guild.prefix))
+            .setAuthor({ name: "InviteCount | v2.0.0", iconURL: this.client.user.displayAvatarURL() })
+            .addFields(
+                { name: message.language.infos.dev.title(), value: message.language.infos.dev.content(uptime), inline: true },
+                { name: title, value: message.language.infos.statistics.content(guildsCount, channelsCount, usersCountW), inline: false },
+                { name: message.language.infos.link.title(), value: message.language.infos.link.content(), inline: false }
+            );
 
-        message.channel.send(embed);
+        message.channel.send({ embeds: [embed] });
     }
 
 };
