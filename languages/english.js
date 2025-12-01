@@ -93,7 +93,7 @@ module.exports = {
 
         dev: {
             title: () => `**Informations**`,
-            content: (uptime) => `<:arrow:766358167382523944> **Developers:** Npg, Alex, Alboom\n <:arrow:766358167382523944> **Library:** [discord.js v14.14.1](https://discord.js.org/#/)\n <:arrow:766358167382523944> **Uptime** ${uptime}\n <:arrow:766358167382523944> **Creation Date:** 12 mai 2019`
+            content: (uptime) => `<:arrow:766358167382523944> **Developers:** Alex\n <:arrow:766358167382523944> **Library:** [discord.js v14.14.1](https://discord.js.org/#/)\n <:arrow:766358167382523944> **Uptime** ${uptime}\n <:arrow:766358167382523944> **Creation Date:** 12 mai 2019`
         },
         statistics: {
             title: () => `**Statistics**`,
@@ -111,7 +111,7 @@ module.exports = {
 
         dev: {
             title: () => `**Developers :**`,
-            content: (uptime) => `[Npg](https://github.com/ThisDudeBoy)\n[Alex](https://discord.com)\n[Alboom](https://discord.com)`
+            content: (uptime) => `[ThisDudeBoy](https://github.com/ThisDudeBoy)`
         },
         statistics: {
             title: () => `**Inspired from :**`,
