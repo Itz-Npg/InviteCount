@@ -7,31 +7,49 @@
 
 > InviteCount is used by + 1 500,000 users in + 1 300 servers!
 
-## 🌐 Dashboard
+## 🔧 Console Application
 
-InviteCount has a powerful dashboard which allow you to manage your servers easily! Configure join/leave messages, change server prefix, server language, etc...
-
-<img src="https://cdn.discordapp.com/attachments/754079986788466769/764408746814078976/Dxs7xZeYjLWbAAAAAElFTkSuQmCC.png" style="margin-right: 2px;width: 40%;" ></img>
+InviteCount is a powerful Discord bot that runs as a console application. Configure join/leave messages, change server prefix, server language, and manage all your server settings easily through Discord commands!
 
 ## 🌍 Supported Languages
 
-InviteCount now supports **12 languages**! Use the `+setlang` command to change your server's language:
+InviteCount now supports **31 languages**! Use the `+setlang` command to change your server's language:
 
-- 🇫🇷 French (`fr`, `francais`, `français`)
-- 🇬🇧 English (`en`, `englich`)
-- 🇹🇷 Turkish (`tr`, `turkce`, `türkçe`, `turkis`)
-- 🇷🇺 Russian (`ru`, `russkiy`, `русский`)
-- 🇯🇵 Japanese (`jp`, `nihongo`, `日本語`)
-- 🇮🇳 Hindi (`hi`, `hindee`, `हिंदी`)
-- 🇵🇹 Portuguese (`pt`, `português`, `portugues`)
-- 🇧🇷 Brazilian Portuguese (`br`, `brasil`, `português-br`, `portugues-br`)
-- 🇪🇸 Spanish (`es`, `español`, `espanol`)
-- 🇩🇪 German (`de`, `deutsch`)
-- 🇮🇹 Italian (`it`, `italiano`)
+- 🇫🇷 French (`fr`)
+- 🇬🇧 English (`en`)
+- 🇹🇷 Turkish (`tr`)
+- 🇷🇺 Russian (`ru`)
+- 🇯🇵 Japanese (`jp`)
+- 🇮🇳 Hindi (`hi`)
+- 🇵🇹 Portuguese (`pt`)
+- 🇧🇷 Brazilian Portuguese (`br`)
+- 🇪🇸 Spanish (`es`)
+- 🇩🇪 German (`de`)
+- 🇮🇹 Italian (`it`)
+- 🇵🇱 Polish (`pl`)
+- 🇳🇱 Dutch (`nl`)
+- 🇸🇪 Swedish (`sv`)
+- 🇳🇴 Norwegian (`no`)
+- 🇩🇰 Danish (`da`)
+- 🇫🇮 Finnish (`fi`)
+- 🇬🇷 Greek (`el`)
+- 🇨🇿 Czech (`cs`)
+- 🇭🇺 Hungarian (`hu`)
+- 🇷🇴 Romanian (`ro`)
+- 🇷🇸 Serbian (`sr`)
+- 🇭🇷 Croatian (`hr`)
+- 🇧🇬 Bulgarian (`bg`)
+- 🇺🇦 Ukrainian (`uk`)
+- 🇸🇰 Slovak (`sk`)
+- 🇸🇮 Slovenian (`sl`)
+- 🇦🇱 Albanian (`sq`)
+- 🇮🇸 Icelandic (`is`)
+- 🇧🇾 Belarusian (`be`)
+- 🇱🇹 Lithuanian (`lt`)
 
 ## 💪 Features
 
-> **InviteCount** has a total of 24 commands!
+> **InviteCount** has a total of 35+ commands with support for 31 languages!
 
 ### ⚙️ Config commands
 
