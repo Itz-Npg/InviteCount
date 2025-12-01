@@ -1,5 +1,5 @@
 const Command = require("../../structures/Command.js"),
-Discord = require("discord.js");
+{ EmbedBuilder } = require("discord.js");
 
 class TestLeave extends Command {
     constructor (client) {
@@ -7,24 +7,26 @@ class TestLeave extends Command {
             name: "testleave",
             enabled: true,
             aliases: [],
-            clientPermissions: [ "EMBED_LINKS" ],
+            clientPermissions: [ "EmbedLinks" ],
             permLevel: 2
         });
     }
 
     async run (message, args, data) {
    
-        let embed = new Discord.MessageEmbed()
+        let embed = new EmbedBuilder()
             .setTitle(message.language.testleave.title())
             .setDescription(message.language.testleave.description())
-            .addField(message.language.testleave.fields.enabled(), (data.guild.leave.enabled ? message.language.testleave.enabled(data.guild.prefix) : message.language.testleave.disabled(data.guild.prefix)))
-            .addField(message.language.testleave.fields.message(), (data.guild.leave.message || message.language.testleave.notDefineds.message(data.guild.prefix)))
-            .addField(message.language.testleave.fields.channel(), (data.guild.leave.channel ? `<#${data.guild.leave.channel}>` : message.language.testleave.notDefineds.channel(data.guild.prefix)))
+            .addFields(
+                { name: message.language.testleave.fields.enabled(), value: (data.guild.leave.enabled ? message.language.testleave.enabled(data.guild.prefix) : message.language.testleave.disabled(data.guild.prefix)) },
+                { name: message.language.testleave.fields.message(), value: (data.guild.leave.message || message.language.testleave.notDefineds.message(data.guild.prefix)) },
+                { name: message.language.testleave.fields.channel(), value: (data.guild.leave.channel ? `<#${data.guild.leave.channel}>` : message.language.testleave.notDefineds.channel(data.guild.prefix)) }
+            )
             .setThumbnail(message.author.avatarURL())
             .setColor(data.color)
-            .setFooter(data.footer)
-            .setTimestamp()
-        message.channel.send(embed);
+            .setFooter({ text: data.footer })
+            .setTimestamp();
+        message.channel.send({ embeds: [embed] });
         
         if(data.guild.leave.enabled && data.guild.leave.message && data.guild.leave.channel && message.guild.channels.cache.get(data.guild.leave.channel)){
             message.guild.channels.cache.get(data.guild.leave.channel).send(this.client.functions.formatMessage(

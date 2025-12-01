@@ -1,5 +1,5 @@
 const Command = require("../../structures/Command.js"),
-Discord = require("discord.js");
+{ EmbedBuilder } = require("discord.js");
 
 class Reload extends Command {
 
@@ -8,7 +8,7 @@ class Reload extends Command {
             name: "reload",
             enabled: true,
             aliases: [ "r" ],
-            clientPermissions: [ "EMBED_LINKS" ],
+            clientPermissions: [ "EmbedLinks" ],
             permLevel: 4
         });
     }

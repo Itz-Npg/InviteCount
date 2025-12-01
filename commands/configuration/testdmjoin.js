@@ -1,5 +1,5 @@
 const Command = require("../../structures/Command.js"),
-Discord = require("discord.js");
+{ EmbedBuilder } = require("discord.js");
 
 class TestDMJoin extends Command {
     constructor (client) {
@@ -7,23 +7,25 @@ class TestDMJoin extends Command {
             name: "testdmjoin",
             enabled: true,
             aliases: [ "testdm" ],
-            clientPermissions: [ "EMBED_LINKS" ],
+            clientPermissions: [ "EmbedLinks" ],
             permLevel: 2
         });
     }
 
     async run (message, args, data) {
         
-        let embed = new Discord.MessageEmbed()
+        let embed = new EmbedBuilder()
             .setTitle(message.language.testdmjoin.title())
             .setDescription(message.language.testdmjoin.description())
-            .addField(message.language.testdmjoin.fields.enabled(), (data.guild.joinDM.enabled ? message.language.testdmjoin.enabled(data.guild.prefix) : message.language.testdmjoin.disabled(data.guild.prefix)))
-            .addField(message.language.testdmjoin.fields.message(), (data.guild.joinDM.message || message.language.testdmjoin.notDefineds.message(data.guild.prefix)))
+            .addFields(
+                { name: message.language.testdmjoin.fields.enabled(), value: (data.guild.joinDM.enabled ? message.language.testdmjoin.enabled(data.guild.prefix) : message.language.testdmjoin.disabled(data.guild.prefix)) },
+                { name: message.language.testdmjoin.fields.message(), value: (data.guild.joinDM.message || message.language.testdmjoin.notDefineds.message(data.guild.prefix)) }
+            )
             .setThumbnail(message.author.avatarURL())
             .setColor(data.color)
-            .setFooter(data.footer)
-            .setTimestamp()
-        message.channel.send(embed);
+            .setFooter({ text: data.footer })
+            .setTimestamp();
+        message.channel.send({ embeds: [embed] });
 
         if(data.guild.joinDM.enabled && data.guild.joinDM.message){
             message.author.send(this.client.functions.formatMessage(

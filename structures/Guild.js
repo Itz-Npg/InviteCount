@@ -5,7 +5,7 @@ config = require("../config.js");
 module.exports = mongoose.model("Guild", new Schema({
 
     /* REQUIRED */
-    id: { type: String }, // Discord ID of the guild
+    id: { type: String, required: true, unique: true, sparse: true }, // Discord ID of the guild
     
     /* BASIC CONF */
     language: { type: String, default: "english" }, // Language of the guild

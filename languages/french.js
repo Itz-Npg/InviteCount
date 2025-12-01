@@ -70,7 +70,7 @@ module.exports = {
         // Join DM Messages
         joinDM: {
             title: () => `💻 **General**`,
-            content: (prefix) => "> `infos`, `stats`, `add`, `membercount`, `userinfo`, `support`, `credits`, `invites`, `leaderboard`"},
+            content: (prefix) => "> `infos`, `add`, `membercount`, `userinfo`, `support`, `credits`, `invites`, `leaderboard`"},
         // Join Messages
         join: {
             title: () => `:tools: **Configuration**`,
@@ -79,6 +79,10 @@ module.exports = {
         leave: {
             title: () => `:envelope: Messages de départs`,
             content: (prefix) => "`"+ prefix +"configleave`,`"+ prefix +"setleave`,`"+ prefix +"testleave`"},
+        // Giveaways
+        giveaway: {
+            title: () => `🎁 **Cadeaux (Giveaways)**`,
+            content: (prefix) => "> `gstart`, `gend`, `glist`, `glogs`, `greroll`"},
         // Invites
         invites: {
             title: () => `:wave: Invitations`,
@@ -98,7 +102,7 @@ module.exports = {
 
         dev: {
             title: () => `**Informations**`,
-            content: (uptime) => `<:arrow:766358167382523944> **Développeurs:** Alex.#7331, Alboom#2121\n <:arrow:766358167382523944> **Librairie:** [discord.js v12.3.1](https://discord.js.org/#/)\n <:arrow:766358167382523944> **Uptime** ${uptime}\n <:arrow:766358167382523944> **Date de création:** 12 mai 2019`
+            content: (uptime) => `<:arrow:766358167382523944> **Développeurs:** Npg, Alex, Alboom\n <:arrow:766358167382523944> **Librairie:** [discord.js v14.14.1](https://discord.js.org/#/)\n <:arrow:766358167382523944> **Uptime** ${uptime}\n <:arrow:766358167382523944> **Date de création:** 12 mai 2019`
         },
         statistics: {
             title: () => `**Statistiques**`,
@@ -116,7 +120,7 @@ module.exports = {
 
         dev: {
             title: () => `**Développeurs :**`,
-            content: (uptime) => `[Alex.#7331](https://github.com/ThisDudeBoy)\n[Alboom#2121](https://chillbot.me)`
+            content: (uptime) => `[Npg](https://github.com/ThisDudeBoy)\n[Alex](https://discord.com)\n[Alboom](https://discord.com)`
         },
         statistics: {
             title: () => `**Inspiré de :**`,
@@ -124,7 +128,7 @@ module.exports = {
         },
         link: {
             title: () => `**Remerciements particuliers aux :**`,
-            content: () => `⭐ Donateurs\n\:flag_fr:  Traducteurs\n👨‍🏭 Aux membres de l'équipe de [**InviteCount**](https://discord.gg/f7f2P2q)`
+            content: () => `⭐ **Androz** pour nous avoir aidés avec ManageInvite!\n🎁 **Pauldb09** pour le système de tombola\n👨‍🏭 Tous nos Staffs & Traducteurs`
         }
     },
 
@@ -132,6 +136,11 @@ module.exports = {
         description: (member, memberData, isYou, nextRank, role) => `${isYou ? `Vous avez` : `**${member.user.username}** a`} **${memberData.invites + memberData.bonus - memberData.leaves - memberData.fake}** invitations! (**${memberData.invites}** ordinaires, **${memberData.bonus}** bonus, **${memberData.fake > 0 ? `-${memberData.fake}` : `${memberData.fake}`}** faux, **${memberData.leaves > 0 ? `-${memberData.leaves}` : `${memberData.leaves}`}** partis)${nextRank ? `\nIl vous faut encore **${Math.round(nextRank.inviteCount - (memberData.invites + memberData.bonus - memberData.leaves - memberData.fake))}** invitations pour atteindre le grade **${role}** !` : ""}`
     },
 
+    inviter: {
+        description: (member, inviterName) => `**${member.user.username}** was invited by **${inviterName}**`,
+        unknown: () => `Unknown`,
+        notFound: () => `Inviter not found (user may have been deleted)`
+    },
     leaderboard: {
         cleared: () => `${emojis.success} | Classement effacé !`,
         user: (user, member, lb) => `${lb} **${user.username}** - **${member.calculatedInvites}** invitations (**${member.invites}** ordinaires, **${member.bonus}** bonus, **${member.fake > 0 ? `-${member.fake}` : `${member.fake}`}** faux, **${member.leaves > 0 ? `-${member.leaves}` : `${member.leaves}`}** partis)`,
@@ -481,7 +490,7 @@ Tapez \`cancel\` pour annuler. ${str}
     },
 
     setlang: {
-        invalid: () => `${emojis.error} | Vous devez entrer une langue valide !\n\n:flag_fr: Français (\`fr\`)\n:flag_gb: English (\`en\`)`,
+        invalid: () => `${emojis.error} | Vous devez entrer une langue valide !\n\n:flag_fr: Français (\`fr\`)\n:flag_gb: English (\`en\`)\n:flag_tr: Türkçe (\`tr\`)\n:flag_ru: Русский (\`ru\`)\n:flag_jp: 日本語 (\`jp\`)\n:flag_in: हिंदी (\`hi\`)\n:flag_pt: Português (\`pt\`)\n:flag_br: Português Brasileiro (\`br\`)\n:flag_es: Español (\`es\`)\n:flag_de: Deutsch (\`de\`)\n:flag_it: Italiano (\`it\`)\n:flag_pl: Polski (\`pl\`)\n:flag_nl: Nederlands (\`nl\`)\n:flag_se: Svenska (\`sv\`)\n:flag_no: Norsk (\`no\`)\n:flag_dk: Dansk (\`da\`)`,
         success: () => `${emojis.success} | :flag_fr: La langue du serveur est maintenant en Français!`
     },
 

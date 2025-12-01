@@ -61,7 +61,7 @@ module.exports = {
         // Join DM Messages
         joinDM: {
             title: () => `💻 **General**`,
-            content: (prefix) => "> `infos`, `stats`, `add`, `membercount`, `userinfo`, `support`, `credits`, `invites`, `leaderboard`"},
+            content: (prefix) => "> `infos`, `add`, `membercount`, `userinfo`, `support`, `credits`, `invites`, `leaderboard`"},
         // Join Messages
         join: {
             title: () => `:tools: **Configuration**`,
@@ -70,6 +70,10 @@ module.exports = {
         leave: {
             title: () => `:envelope: Leave Messages`,
             content: (prefix) => "`configleave`, `setleave`, `testleave`"},
+        // Giveaways
+        giveaway: {
+            title: () => `🎁 **Giveaways**`,
+            content: (prefix) => "> `gstart`, `gend`, `glist`, `glogs`, `greroll`"},
         // Invites
         invites: {
             title: () => `:wave: Invites`,
@@ -89,7 +93,7 @@ module.exports = {
 
         dev: {
             title: () => `**Informations**`,
-            content: (uptime) => `<:arrow:766358167382523944> **Developpers:** Alex.#7331, Alboom#2121\n <:arrow:766358167382523944> **Library:** [discord.js v12.3.1](https://discord.js.org/#/)\n <:arrow:766358167382523944> **Uptime** ${uptime}\n <:arrow:766358167382523944> **Creation Date:** 12 mai 2019`
+            content: (uptime) => `<:arrow:766358167382523944> **Developers:** Npg, Alex, Alboom\n <:arrow:766358167382523944> **Library:** [discord.js v14.14.1](https://discord.js.org/#/)\n <:arrow:766358167382523944> **Uptime** ${uptime}\n <:arrow:766358167382523944> **Creation Date:** 12 mai 2019`
         },
         statistics: {
             title: () => `**Statistics**`,
@@ -106,8 +110,8 @@ module.exports = {
         content: () => `InviteCount allows you to manage the members of your server by looking at their invites.`,
 
         dev: {
-            title: () => `**Developpers :**`,
-            content: (uptime) => `[Alex.#7331](https://github.com/ThisDudeBoy)\n[Alboom#2121](https://chillbot.me)\n[BXEE](https://github.com/BXEEOFFI)`
+            title: () => `**Developers :**`,
+            content: (uptime) => `[Npg](https://github.com/ThisDudeBoy)\n[Alex](https://discord.com)\n[Alboom](https://discord.com)`
         },
         statistics: {
             title: () => `**Inspired from :**`,
@@ -115,7 +119,7 @@ module.exports = {
         },
         link: {
             title: () => `**Special thanks to :**`,
-            content: () => `⭐ Donators\n\:flag_fr:  Translators\n👨‍🏭 All Staffs`
+            content: () => `⭐ **Androz** for helping us with ManageInvite!\n🎁 **Pauldb09** for the giveaway system\n👨‍🏭 All Staffs & Translators`
         }
     },
 
@@ -123,6 +127,11 @@ module.exports = {
         description: (member, memberData, isYou, nextRank, role) => `${isYou ? `You have` : `**${member.user.username}** has`} **${memberData.invites + memberData.bonus - memberData.leaves - memberData.fake}** invites! (**${memberData.invites}** regular, **${memberData.bonus}** bonus, **${memberData.fake > 0 ? `-${memberData.fake}` : `${memberData.fake}`}** fake, **${memberData.leaves > 0 ? `-${memberData.leaves}` : `${memberData.leaves}`}** leaves)${nextRank ? `\nYou need **${Math.round(nextRank.inviteCount - (memberData.invites + memberData.bonus - memberData.leaves - memberData.fake))}** more invites to get the next rank: **${role}**!` : ""}`
     },
 
+    inviter: {
+        description: (member, inviterName) => `**${member.user.username}** was invited by **${inviterName}**`,
+        unknown: () => `Unknown`,
+        notFound: () => `Inviter not found (user may have been deleted)`
+    },
     leaderboard: {
         cleared: () => `${emojis.success} | Leaderboard cleared!`,
         user: (user, member, lb) => `${lb} **${user.username}** - **${member.calculatedInvites}** invites (**${member.invites}** regular, **${member.bonus}** bonus, **${member.fake > 0 ? `-${member.fake}` : `${member.fake}`}** fake, **${member.leaves > 0 ? `-${member.leaves}` : `${member.leaves}`}** leaves)`,
@@ -459,7 +468,7 @@ Type \`cancel\` to abort. ${str}
     },
 
     setlang: {
-        invalid: () => `${emojis.error} | You must write a valid language!\n\n:flag_fr: Français (\`fr\`)\n:flag_gb: English (\`en\`)`,
+        invalid: () => `${emojis.error} | You must write a valid language!\n\n:flag_fr: Français (\`fr\`)\n:flag_gb: English (\`en\`)\n:flag_tr: Türkçe (\`tr\`)\n:flag_ru: Русский (\`ru\`)\n:flag_jp: 日本語 (\`jp\`)\n:flag_in: हिंदी (\`hi\`)\n:flag_pt: Português (\`pt\`)\n:flag_br: Português Brasileiro (\`br\`)\n:flag_es: Español (\`es\`)\n:flag_de: Deutsch (\`de\`)\n:flag_it: Italiano (\`it\`)\n:flag_pl: Polski (\`pl\`)\n:flag_nl: Nederlands (\`nl\`)\n:flag_se: Svenska (\`sv\`)\n:flag_no: Norsk (\`no\`)\n:flag_dk: Dansk (\`da\`)\n:flag_fi: Suomi (\`fi\`)\n:flag_gr: Ελληνικά (\`el\`)\n:flag_cz: Čeština (\`cs\`)\n:flag_hu: Magyar (\`hu\`)\n:flag_ro: Română (\`ro\`)\n:flag_rs: Српски (\`sr\`)\n:flag_hr: Hrvatski (\`hr\`)\n:flag_bg: Български (\`bg\`)\n:flag_ua: Українська (\`uk\`)`,
         success: () => `${emojis.success} | :flag_gb: The server language is now in English!`
     },
     

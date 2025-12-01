@@ -4,8 +4,8 @@ Schema = mongoose.Schema;
 module.exports = mongoose.model("GuildMember", new Schema({
 
     /* REQUIRED */
-    id: { type: String }, // Discord ID of the user
-    guildID: { type: String },
+    userId: { type: String, required: true }, // Discord ID of the user
+    guildId: { type: String, required: true },
 
     /* STATS */
     fake: { type: Number, default: 0 },
@@ -33,4 +33,8 @@ module.exports = mongoose.model("GuildMember", new Schema({
     /* BOT */
     bot: { type: Boolean, default: false }
 
+}, { 
+    indexes: [
+        { guildId: 1, userId: 1, unique: true, sparse: true }
+    ]
 }));

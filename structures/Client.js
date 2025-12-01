@@ -1,67 +1,141 @@
-const { Client, Collection } = require("discord.js"),
+const { Client, Collection, GatewayIntentBits, Partials, ActivityType } = require("discord.js"),
     util = require("util"),
     path = require("path");
 const { Database } = require('quickmongo');
 const config = require("../config.js")
 const { GiveawaysManager } = require("discord-giveaways");
-const db = new Database(config.mongodb);
+
+let db = null;
+let dbReady = false;
+let dbConnectPromise = null;
+
+if (config.mongodb) {
+    db = new Database(config.mongodb);
+    dbConnectPromise = db.connect()
+        .then(() => {
+            dbReady = true;
+            console.log('QuickMongo database connected successfully');
+        })
+        .catch(err => {
+            console.error('QuickMongo connection error:', err);
+            db = null;
+            dbReady = false;
+        });
+}
+
+async function waitForDb() {
+    if (!config.mongodb) return false;
+    if (dbReady) return true;
+    if (dbConnectPromise) {
+        try {
+            await dbConnectPromise;
+        } catch (e) {
+            return false;
+        }
+        return dbReady;
+    }
+    return false;
+}
+
+function getDb() {
+    return db;
+}
+
+function isDbReady() {
+    return dbReady;
+}
+
 const GiveawayManagerWithShardSupport = class extends GiveawaysManager {
     async getAllGiveaways() {
-        return await db.get('giveaways');
+        if (!await waitForDb()) return [];
+        try {
+            return await db.get('giveaways') || [];
+        } catch (err) {
+            console.error('Error getting giveaways:', err.message);
+            return [];
+        }
     }
 
-    async saveGiveaway(messageID, giveawayData) {
-        await db.push('giveaways', giveawayData);
-        return true;
+    async saveGiveaway(messageId, giveawayData) {
+        if (!await waitForDb()) return false;
+        try {
+            await db.push('giveaways', giveawayData);
+            return true;
+        } catch (err) {
+            console.error('Error saving giveaway:', err.message);
+            return false;
+        }
     }
 
-    async editGiveaway(messageID, giveawayData) {
-        const giveaways = await db.get('giveaways');
-        const newGiveawaysArray = giveaways.filter((giveaway) => giveaway.messageID !== messageID);
-        newGiveawaysArray.push(giveawayData);
-        await db.set('giveaways', newGiveawaysArray);
-        return true;
+    async editGiveaway(messageId, giveawayData) {
+        if (!await waitForDb()) return false;
+        try {
+            const giveaways = await db.get('giveaways') || [];
+            const newGiveawaysArray = giveaways.filter((giveaway) => giveaway.messageId !== messageId);
+            newGiveawaysArray.push(giveawayData);
+            await db.set('giveaways', newGiveawaysArray);
+            return true;
+        } catch (err) {
+            console.error('Error editing giveaway:', err.message);
+            return false;
+        }
     }
 
-    async deleteGiveaway(messageID) {
-        const data = await db.get('giveaways');
-        const newGiveawaysArray = data.filter((giveaway) => giveaway.messageID !== messageID);
-        await db.set('giveaways', newGiveawaysArray);
-        return true;
+    async deleteGiveaway(messageId) {
+        if (!await waitForDb()) return false;
+        try {
+            const data = await db.get('giveaways') || [];
+            const newGiveawaysArray = data.filter((giveaway) => giveaway.messageId !== messageId);
+            await db.set('giveaways', newGiveawaysArray);
+            return true;
+        } catch (err) {
+            console.error('Error deleting giveaway:', err.message);
+            return false;
+        }
     }
-  async refreshStorage() {
-        // This should make all shard refreshing their cache with the updated database
+    
+    async refreshStorage() {
         return client.shard.broadcastEval(() => this.giveawaysManager.getAllGiveaways());
     }
 };
-// Creates ManageInvite class
+
 class ManageInvite extends Client {
 
-    constructor(options) {
-        super(options);
-        // Config
-        this.config = require("../config"); // Load the config file
-        this.permLevels = require("../helpers/permissions"); // Load permissions file
-        // Commands
-        this.commands = new Collection(); // Creates new commands collection
-        this.aliases = new Collection(); // Creates new command aliases collection
-        // Utils
-        this.logger = require("../helpers/logger"); // Load the logger file
-        this.functions = require("../helpers/functions"); // Load the functions filec
-        this.wait = util.promisify(setTimeout); // client.wait(1000) - Wait 1 second
-        // Invitations data
+    constructor() {
+        super({
+            intents: [
+                GatewayIntentBits.Guilds,
+                GatewayIntentBits.GuildMembers,
+                GatewayIntentBits.GuildMessages,
+                GatewayIntentBits.GuildMessageReactions,
+                GatewayIntentBits.GuildInvites,
+                GatewayIntentBits.MessageContent,
+                GatewayIntentBits.DirectMessages
+            ],
+            partials: [
+                Partials.Message,
+                Partials.Channel,
+                Partials.Reaction,
+                Partials.GuildMember,
+                Partials.User
+            ]
+        });
+        this.config = require("../config");
+        this.permLevels = require("../helpers/permissions");
+        this.commands = new Collection();
+        this.aliases = new Collection();
+        this.logger = require("../helpers/logger");
+        this.functions = require("../helpers/functions");
+        this.wait = util.promisify(setTimeout);
         this.invitations = [];
         this.fetched = false;
         this.fetching = false;
-        // Databases
-        this.guildMembersData = require("../structures/GuildMember"); // Used to store fake invites, bonus, etc...
-        this.guildsData = require("../structures/Guild"); // Used to store prefixes, languages, join messages, etc...
-        this.db = db; 
+        this.guildMembersData = require("../structures/GuildMember");
+        this.guildsData = require("../structures/Guild");
 
         this.states = {};
         this.spawned = false;
         this.knownGuilds = [];
-
 
         this.giveawaysManager = new GiveawayManagerWithShardSupport(this, {
             storage: false,
@@ -76,8 +150,15 @@ class ManageInvite extends Client {
         });
 
     }
+    
+    get db() {
+        return db;
+    }
+    
+    async waitForDb() {
+        return await waitForDb();
+    }
 
-    // This function is used to load a command and add it to the collection
     loadCommand(commandPath, commandName) {
         try {
             const props = new(require(`.${commandPath}${path.sep}${commandName}`))(this);
@@ -95,7 +176,6 @@ class ManageInvite extends Client {
         }
     }
 
-    // This function is used to unload a command (you need to load them again)
     async unloadCommand(commandPath, commandName) {
         let command;
         if (this.commands.has(commandName)) {
@@ -113,31 +193,64 @@ class ManageInvite extends Client {
         return false;
     }
 
-    // This function is used to find a guild data or create it
     async findOrCreateGuild(param, isLean) {
         let Guild = this.guildsData;
         return new Promise(async function(resolve, reject) {
+            if (!param || !param.id) {
+                return reject(new Error("Invalid parameters: id is required"));
+            }
             let guild = (isLean ? await Guild.findOne(param).lean() : await Guild.findOne(param));
             if (guild) {
                 resolve(guild);
             } else {
                 guild = new Guild(param);
-                await guild.save();
+                await guild.save().catch(err => {
+                    if (err.code === 11000) {
+                        console.error("Duplicate key error prevented for guild:", param, err.message);
+                        reject(err);
+                    } else {
+                        throw err;
+                    }
+                });
                 resolve(isLean ? guild.toJSON() : guild);
             }
         });
     }
 
-    // This function is used to find a guild member data or create it
     async findOrCreateGuildMember(param, isLean) {
         let GuildMember = this.guildMembersData;
         return new Promise(async function(resolve, reject) {
-            let guildMember = (isLean ? await GuildMember.findOne(param).lean() : await GuildMember.findOne(param));
+            // Normalize parameters to use correct field names
+            let queryParam = {};
+            if (param.id) queryParam.userId = param.id;
+            if (param.userId) queryParam.userId = param.userId;
+            if (param.guildID) queryParam.guildId = param.guildID;
+            if (param.guildId) queryParam.guildId = param.guildId;
+            
+            if (!queryParam.guildId || !queryParam.userId) {
+                return reject(new Error("Invalid parameters: guildId and userId are required"));
+            }
+            
+            let guildMember = (isLean ? await GuildMember.findOne(queryParam).lean() : await GuildMember.findOne(queryParam));
             if (guildMember) {
                 resolve(guildMember);
             } else {
-                guildMember = new GuildMember(param);
-                await guildMember.save();
+                // Preserve original parameters but use correct schema field names
+                let saveParam = {
+                    userId: queryParam.userId,
+                    guildId: queryParam.guildId
+                };
+                if (param.bot !== undefined) saveParam.bot = param.bot;
+                
+                guildMember = new GuildMember(saveParam);
+                await guildMember.save().catch(err => {
+                    if (err.code === 11000) {
+                        console.error("Duplicate key error prevented for guildMember:", saveParam, err.message);
+                        reject(err);
+                    } else {
+                        throw err;
+                    }
+                });
                 resolve(isLean ? guildMember.toJSON() : guildMember);
             }
         });
@@ -146,13 +259,11 @@ class ManageInvite extends Client {
     async resolveMember(search, guild) {
         let member = null;
         if (!search || typeof search !== "string") return;
-        // Try ID search
         if (search.match(/^<@!?(\d+)>$/)) {
             let id = search.match(/^<@!?(\d+)>$/)[1];
             member = await guild.members.fetch(id).catch(() => {});
             if (member) return member;
         }
-        // Try username search
         if (search.match(/^!?([^#]+)#(\d+)$/)) {
             guild = await guild.members.fetch();
             member = guild.members.cache.find((m) => m.user.tag === search);
@@ -165,17 +276,9 @@ class ManageInvite extends Client {
     async resolveUser(search) {
         let user = null;
         if (!search || typeof search !== "string") return;
-        // Try ID search
-        if (search.match(/^!?([^#]+)#(\d+)$/)) {
-            let id = search.match(/^!?([^#]+)#(\d+)$/)[1];
-            user = this.users.fetch(id).catch((err) => {});
-            if (user) return user;
-        }
-        // Try username search
-        if (search.match(/^!?([^#]+)#(\d+)$/)) {
-            let username = search.match(/^!?([^#]+)#(\d+)$/)[0];
-            let discriminator = search.match(/^!?([^#]+)#(\d+)$/)[1];
-            user = this.users.find((u) => u.username === username && u.discriminator === discriminator);
+        if (search.match(/^<@!?(\d+)>$/)) {
+            let id = search.match(/^<@!?(\d+)>$/)[1];
+            user = await this.users.fetch(id).catch(() => {});
             if (user) return user;
         }
         user = await this.users.fetch(search).catch(() => {});

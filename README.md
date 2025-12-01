@@ -2,7 +2,7 @@
 
 # InviteCount
 [![](https://img.shields.io/discord/753213979706261604.svg?logo=discord&colorB=7289DA)](https://discord.com/invite/6QsXCfw)
-[![](https://img.shields.io/badge/discord.js-v12.0.0--dev-blue.svg?logo=npm)](https://github.com/discordjs)
+[![](https://img.shields.io/badge/discord.js-v14.14.1-blue.svg?logo=npm)](https://github.com/discordjs)
 [![](https://img.shields.io/badge/paypal-donate-blue.svg)](https://patreon.com/Androz2091)
 
 > InviteCount is used by + 1 500,000 users in + 1 300 servers!
@@ -12,6 +12,22 @@
 InviteCount has a powerful dashboard which allow you to manage your servers easily! Configure join/leave messages, change server prefix, server language, etc...
 
 <img src="https://cdn.discordapp.com/attachments/754079986788466769/764408746814078976/Dxs7xZeYjLWbAAAAAElFTkSuQmCC.png" style="margin-right: 2px;width: 40%;" ></img>
+
+## 🌍 Supported Languages
+
+InviteCount now supports **12 languages**! Use the `+setlang` command to change your server's language:
+
+- 🇫🇷 French (`fr`, `francais`, `français`)
+- 🇬🇧 English (`en`, `englich`)
+- 🇹🇷 Turkish (`tr`, `turkce`, `türkçe`, `turkis`)
+- 🇷🇺 Russian (`ru`, `russkiy`, `русский`)
+- 🇯🇵 Japanese (`jp`, `nihongo`, `日本語`)
+- 🇮🇳 Hindi (`hi`, `hindee`, `हिंदी`)
+- 🇵🇹 Portuguese (`pt`, `português`, `portugues`)
+- 🇧🇷 Brazilian Portuguese (`br`, `brasil`, `português-br`, `portugues-br`)
+- 🇪🇸 Spanish (`es`, `español`, `espanol`)
+- 🇩🇪 German (`de`, `deutsch`)
+- 🇮🇹 Italian (`it`, `italiano`)
 
 ## 💪 Features
 
@@ -97,4 +113,3 @@ The main bot [InviteCount](https://top.gg/bot/577236734245470228/invite) don't u
 *   [Github](https://github.com/ThisDudeBoy/InviteCount)
 *   [InviteCount Discord Bot 24/7 Online (New version)](https://top.gg/bot/577236734245470228/invite)
 *   [ManageInvite](https://github.com/ManageInvite/)
-

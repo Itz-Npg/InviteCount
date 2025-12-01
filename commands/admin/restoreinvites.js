@@ -1,5 +1,5 @@
 const Command = require("../../structures/Command.js"),
-Discord = require("discord.js");
+{ EmbedBuilder } = require("discord.js");
 
 class RestoreInvites extends Command {
     constructor (client) {
@@ -7,7 +7,7 @@ class RestoreInvites extends Command {
             name: "restoreinvites",
             enabled: true,
             aliases: [ "resinvites", "restoreinv", "resinv", "restoreinvite", "restore-invites", "restore-invite" ],
-            clientPermissions: [ "EMBED_LINKS" ],
+            clientPermissions: [ "EmbedLinks" ],
             permLevel: 2
         });
     }
@@ -31,50 +31,44 @@ class RestoreInvites extends Command {
             message.channel.send(message.language.restoreinvites.confirmations.member(data.guild.prefix, member))
             : message.channel.send(message.language.restoreinvites.confirmations.all(data.guild.prefix, memberCount))
         );
-        await message.channel.awaitMessages((m) => m.author.id === message.author.id && (m.content === "cancel" || m.content === "-confirm"), { max: 1, time: 90000 }).then(async (collected) => {
-            if(collected.first().content === "cancel") return conf.edit(message.language.restoreinvites.confirmations.cancelled());
-            collected.first().delete();
-            await (member ? conf.edit(message.language.restoreinvites.loading.member(data.guild.prefix, member)) : conf.edit(message.language.restoreinvites.loading.all(data.guild.prefix)));
-            if(member){
-                // Restore invites
-                member.data.invites = memberData.old_invites;
-                // Restore fake
-                member.data.fake = memberData.old_fake;
-                // Restore leaves
-                member.data.leaves = memberData.old_leaves;
-                // Restore bonus
-                member.data.bonus = memberData.old_bonus;
-                // Save the member
-                await member.data.save();
-            } else {
-                // Find all members in the guild
-                await this.client.functions.asyncForEach(members, async (memberData) => {
-                    // Restore invites
-                    memberData.invites = memberData.old_invites;
-                    // Restore fake
-                    memberData.fake = memberData.old_fake;
-                    // Restore leaves
-                    memberData.leaves = memberData.old_leaves;
-                    // Restore bonus
-                    memberData.bonus = memberData.old_bonus;
-                    // Restore the member
-                    await memberData.save();
-                });
-            }
+        
+        const filter = (m) => m.author.id === message.author.id && (m.content === "cancel" || m.content === "-confirm");
+        const collected = await message.channel.awaitMessages({ filter, max: 1, time: 90000 }).catch(() => null);
+        
+        if (!collected || collected.size === 0) {
+            return conf.edit(message.language.restoreinvites.confirmations.cancelled());
+        }
+        
+        if(collected.first().content === "cancel") return conf.edit(message.language.restoreinvites.confirmations.cancelled());
+        collected.first().delete().catch(() => {});
+        await (member ? conf.edit(message.language.restoreinvites.loading.member(data.guild.prefix, member)) : conf.edit(message.language.restoreinvites.loading.all(data.guild.prefix)));
+        
+        if(member){
+            member.data.invites = member.data.old_invites;
+            member.data.fake = member.data.old_fake;
+            member.data.leaves = member.data.old_leaves;
+            member.data.bonus = member.data.old_bonus;
+            await member.data.save();
+        } else {
+            await this.client.functions.asyncForEach(members, async (memberData) => {
+                memberData.invites = memberData.old_invites;
+                memberData.fake = memberData.old_fake;
+                memberData.leaves = memberData.old_leaves;
+                memberData.bonus = memberData.old_bonus;
+                await memberData.save();
+            });
+        }
 
-            let embed = new Discord.MessageEmbed()
-            .setAuthor(message.language.restoreinvites.title())
+        let embed = new EmbedBuilder()
+            .setAuthor({ name: message.language.restoreinvites.title() })
             .setDescription((member ?
                 message.language.restoreinvites.titles.member(data.guild.prefix, member)
                 : message.language.restoreinvites.titles.all(data.guild.prefix)
             ))
             .setColor(data.color)
-            .setFooter(data.footer);
+            .setFooter({ text: data.footer });
 
-            conf.edit(null, { embed });
-        }).catch(() => {
-            conf.edit(message.language.restoreinvites.confirmations.cancelled());
-        });
+        conf.edit({ content: null, embeds: [embed] });
     }
 
 };
